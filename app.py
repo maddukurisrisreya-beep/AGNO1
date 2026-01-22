@@ -11,7 +11,7 @@ from resume_parser import extract_resume_text
 
 
 # --------------------------------------------------
-# LOAD ENV VARIABLES (FORCE LOAD)
+# LOAD ENV VARIABLES (LOCAL USE)
 # --------------------------------------------------
 load_dotenv(dotenv_path=".env", override=True)
 
@@ -20,7 +20,7 @@ if not os.getenv("GROQ_API_KEY"):
     st.error("❌ GROQ_API_KEY not loaded. Check your .env file.")
     st.stop()
 
-# DEBUG (TEMP — REMOVE AFTER CONFIRMING)
+# DEBUG (REMOVE AFTER CONFIRMING)
 st.write("🔑 KEY CHECK:", repr(os.getenv("GROQ_API_KEY")))
 
 
@@ -84,7 +84,7 @@ if agent:
             result = agent.run(question)
 
             st.subheader("Answer")
-            st.write(result.content)   # ✅ ONLY show answer text
+            st.write(result.content)
 
         except Exception as e:
             st.error("❌ Failed to generate answer")
