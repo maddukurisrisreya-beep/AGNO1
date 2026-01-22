@@ -1,0 +1,8 @@
+streamlit
+agno
+groq
+faiss-cpu
+torch
+transformers
+pdfplumber
+numpy
