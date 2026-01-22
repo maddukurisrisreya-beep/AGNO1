@@ -6,3 +6,4 @@ torch
 transformers
 pdfplumber
 numpy
+python-dotenv
