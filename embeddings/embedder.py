@@ -8,7 +8,6 @@ class Embedder:
             "intfloat/e5-small-v2"
         )
 
-        # Force normal loading (NO meta tensors)
         self.model = AutoModel.from_pretrained(
             "intfloat/e5-small-v2",
             torch_dtype=torch.float32
@@ -31,5 +30,4 @@ class Embedder:
             outputs = self.model(**inputs)
             embeddings = outputs.last_hidden_state.mean(dim=1)
 
-        # SAFELY move to CPU
         return embeddings.detach().cpu().numpy()

@@ -11,17 +11,13 @@ from resume_parser import extract_resume_text
 
 
 # --------------------------------------------------
-# LOAD ENV VARIABLES (LOCAL USE)
+# LOAD ENV VARIABLES (LOCAL / DEPLOYMENT)
 # --------------------------------------------------
 load_dotenv(dotenv_path=".env", override=True)
 
-# HARD CHECK — FAIL EARLY
 if not os.getenv("GROQ_API_KEY"):
-    st.error("❌ GROQ_API_KEY not loaded. Check your .env file.")
+    st.error("❌ GROQ_API_KEY not set")
     st.stop()
-
-# DEBUG (REMOVE AFTER CONFIRMING)
-st.write("🔑 KEY CHECK:", repr(os.getenv("GROQ_API_KEY")))
 
 
 # --------------------------------------------------
@@ -32,11 +28,16 @@ st.title("📄 Agentic Resume RAG Chatbot")
 
 
 # --------------------------------------------------
-# INITIALIZE COMPONENTS
+# SESSION STATE INITIALIZATION (CRITICAL)
 # --------------------------------------------------
-embedder = Embedder()
-vector_store = None
-agent = None
+if "embedder" not in st.session_state:
+    st.session_state.embedder = Embedder()
+
+if "vector_store" not in st.session_state:
+    st.session_state.vector_store = None
+
+if "agent" not in st.session_state:
+    st.session_state.agent = None
 
 
 # --------------------------------------------------
@@ -51,24 +52,18 @@ if uploaded_file:
     with open(resume_path, "wb") as f:
         f.write(uploaded_file.read())
 
-    # Extract resume text
     resume_text = extract_resume_text(resume_path)
-
-    # Chunk by section
     chunks = chunk_by_section(resume_text)
 
-    # Create embeddings
-    embeddings = embedder.embed(chunks)
+    embeddings = st.session_state.embedder.embed(chunks)
 
-    # Vector store
     vector_store = VectorStore(embedding_dim=embeddings.shape[1])
     vector_store.add(embeddings, chunks)
 
-    # Initialize tools
-    init_tools(embedder, vector_store)
+    st.session_state.vector_store = vector_store
 
-    # Create agent
-    agent = create_resume_agent()
+    init_tools(st.session_state.embedder, vector_store)
+    st.session_state.agent = create_resume_agent()
 
     st.success("✅ Resume processed successfully!")
 
@@ -76,12 +71,12 @@ if uploaded_file:
 # --------------------------------------------------
 # QUESTION ANSWERING
 # --------------------------------------------------
-if agent:
+if st.session_state.agent:
     question = st.text_input("Ask a question about the resume")
 
     if question:
         try:
-            result = agent.run(question)
+            result = st.session_state.agent.run(question)
 
             st.subheader("Answer")
             st.write(result.content)

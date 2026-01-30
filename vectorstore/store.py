@@ -8,12 +8,19 @@ class VectorStore:
         self.texts = []
 
     def add(self, embeddings, texts):
-        self.index.add(embeddings.astype("float32"))
+        embeddings = np.array(embeddings).astype("float32")
+        self.index.add(embeddings)
         self.texts.extend(texts)
 
     def search(self, query_embedding, k=3):
-        distances, indices = self.index.search(
-            query_embedding.astype("float32"), k
-        )
+        if len(self.texts) == 0:
+            return []
 
-        return [self.texts[i] for i in indices[0] if i < len(self.texts)]
+        query_embedding = np.array(query_embedding).astype("float32")
+        distances, indices = self.index.search(query_embedding, k)
+
+        return [
+            self.texts[i]
+            for i in indices[0]
+            if i < len(self.texts)
+        ]
